@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 	ld "github.com/launchdarkly/go-server-sdk/v6"
-    "github.com/launchdarkly/go-sdk-common/v3/ldcontext"
+    	"github.com/launchdarkly/go-sdk-common/v3/ldcontext"
 )
 
 // New sets up our routes and returns a *http.ServeMux.
@@ -29,9 +29,9 @@ func New() *http.ServeMux {
 		w.WriteHeader(http.StatusOK)
 		showFeature, _ := client.BoolVariation(flagKey, context, false)
 		if showFeature {
-    		w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. The feature is on."}`))
+    			w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. The feature is on."}`))
 		} else {
-    		w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. The feature is off."}`))
+	    		w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. The feature is off."}`))
 		}
 		
 	}))
