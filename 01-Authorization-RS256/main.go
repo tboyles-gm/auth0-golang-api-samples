@@ -1,12 +1,10 @@
 package main
 
 import (
+	"01-Authorization-RS256/router"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
-
-	"github.com/joho/godotenv"
-
-	"01-Authorization-RS256/router"
 )
 
 func main() {
