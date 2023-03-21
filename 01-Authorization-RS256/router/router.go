@@ -7,28 +7,77 @@ import (
 	"net/http"
 	"os"
 	"time"
-	ld "github.com/launchdarkly/go-server-sdk/v6"
-    	"github.com/launchdarkly/go-sdk-common/v3/ldcontext"
+	"fmt"
+	"encoding/json"
+	"log"
+	"github.com/growthbook/growthbook-golang"
 )
+
+type GBFeaturesResponse struct {
+	Status      int             `json:"status"`
+	Features    json.RawMessage `json:"features"`
+	DateUpdated time.Time       `json:"dateUpdated"`
+}
+
+func GetFeatureFlag(flagname string) (state bool) {
+
+	log.Println("Getting state for flag ", flagname)
+	userAttributes := growthbook.Attributes{
+		"id":       "auth0-golang-api-samples",
+		"service": true,
+		"country":  "United States",
+	}
+
+	// Get JSON from GrowthBook and deserialize it into GBFeaturesResponse struct
+	res, err := http.Get(os.Getenv("GROWTHBOOK_URL"))
+	if err != nil {
+		fmt.Printf("Error fetching features from GrowthBook: %s \n", err)
+		os.Exit(1)
+	}
+	var featuresResponse GBFeaturesResponse
+	err = json.NewDecoder(res.Body).Decode(&featuresResponse)
+	if err != nil {
+		fmt.Printf("Error decoding JSON: %s \n", err)
+		os.Exit(1)
+	}
+	features := growthbook.ParseFeatureMap(featuresResponse.Features)
+
+	// This will get called when the font_colour experiment below is evaluated
+	trackingCallback := func(experiment *growthbook.Experiment, result *growthbook.ExperimentResult) {
+		fmt.Printf("Experiment Viewed: %s - Variation index: %d - Value: %s \n", experiment.Key, result.VariationID, result.Value)
+	}
+
+	// Create a growthbook.Context instance with the features and attributes
+	context := growthbook.NewContext().
+		WithFeatures(features).
+		WithAttributes(userAttributes).
+		WithTrackingCallback(trackingCallback)
+
+	// Create a growthbook.GrowthBook instance
+	gb := growthbook.New(context)
+
+	result := gb.Feature(flagname)
+	log.Println("Result was ", result.Value)
+	if result.On {
+		return true
+	} else {
+		return false
+	}
+}
+
 
 // New sets up our routes and returns a *http.ServeMux.
 func New() *http.ServeMux {
-	
-	client, _ := ld.MakeClient(os.Getenv("LD_SDK_KEY"), 5 * time.Second)
-	flagKey := "test"
-	context := ldcontext.NewBuilder("api_public").
-    	Name("api_public").
-    	Build()
 
 	
+
 	router := http.NewServeMux()
 
 	// This route is always accessible.
 	router.Handle("/api/public", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		showFeature, _ := client.BoolVariation(flagKey, context, false)
-		if showFeature {
+		if GetFeatureFlag("test") {
     			w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. This is the Launchdarkly version. The feature is on."}`))
 		} else {
 	    		w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. This is the Launchdarkly version. The feature is off."}`))
@@ -45,8 +94,7 @@ func New() *http.ServeMux {
 			w.Header().Set("Access-Control-Allow-Headers", "Authorization")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			showFeature, _ := client.BoolVariation(flagKey, context, false)
-			if showFeature {
+			if GetFeatureFlag("test") {
 				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is on."}`))
 			} else {
 				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is off."}`))
@@ -75,8 +123,7 @@ func New() *http.ServeMux {
 			}
 
 			w.WriteHeader(http.StatusOK)
-			showFeature, _ := client.BoolVariation(flagKey, context, false)
-			if showFeature {
+			if GetFeatureFlag("test") {
 				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is on."}`))
 			} else {
 				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is off."}`))
