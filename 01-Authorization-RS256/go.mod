@@ -3,27 +3,16 @@ module 01-Authorization-RS256
 go 1.18
 
 require (
+	github.com/Flagsmith/flagsmith-go-client/v2 v2.2.1
 	github.com/auth0/go-jwt-middleware/v2 v2.1.0
 	github.com/joho/godotenv v1.5.1
-	github.com/launchdarkly/go-sdk-common/v3 v3.0.1
-	github.com/launchdarkly/go-server-sdk/v6 v6.0.3
 )
 
 require (
-	github.com/google/uuid v1.1.1 // indirect
-	github.com/gregjones/httpcache v0.0.0-20171119193500-2bcd89a1743f // indirect
-	github.com/josharian/intern v1.0.0 // indirect
-	github.com/launchdarkly/ccache v1.1.0 // indirect
-	github.com/launchdarkly/eventsource v1.6.2 // indirect
-	github.com/launchdarkly/go-jsonstream/v3 v3.0.0 // indirect
-	github.com/launchdarkly/go-sdk-events/v2 v2.0.1 // indirect
-	github.com/launchdarkly/go-semver v1.0.2 // indirect
-	github.com/launchdarkly/go-server-sdk-evaluation/v2 v2.0.2 // indirect
-	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
+	github.com/blang/semver/v4 v4.0.0 // indirect
+	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/exp v0.0.0-20220823124025-807a23277127 // indirect
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
+	golang.org/x/net v0.8.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
