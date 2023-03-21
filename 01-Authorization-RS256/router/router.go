@@ -29,9 +29,9 @@ func New() *http.ServeMux {
 		w.WriteHeader(http.StatusOK)
 		showFeature, _ := client.BoolVariation(flagKey, context, false)
 		if showFeature {
-    			w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. The feature is on."}`))
+    			w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. This is the Launchdarkly version. The feature is on."}`))
 		} else {
-	    		w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. The feature is off."}`))
+	    		w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. This is the Launchdarkly version. The feature is off."}`))
 		}
 		
 	}))
@@ -47,9 +47,9 @@ func New() *http.ServeMux {
 			w.WriteHeader(http.StatusOK)
 			showFeature, _ := client.BoolVariation(flagKey, context, false)
 			if showFeature {
-				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. The feature is on."}`))
+				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is on."}`))
 			} else {
-				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. The feature is off."}`))
+				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is off."}`))
 			}
 		}),
 	))
@@ -77,9 +77,9 @@ func New() *http.ServeMux {
 			w.WriteHeader(http.StatusOK)
 			showFeature, _ := client.BoolVariation(flagKey, context, false)
 			if showFeature {
-				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. The feature is on."}`))
+				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is on."}`))
 			} else {
-				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. The feature is off."}`))
+				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is off."}`))
 			}
 		}),
 	))
