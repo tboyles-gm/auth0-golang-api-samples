@@ -6,32 +6,49 @@ import (
 	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"net/http"
 	"os"
-	"time"
-	ld "github.com/launchdarkly/go-server-sdk/v6"
-    	"github.com/launchdarkly/go-sdk-common/v3/ldcontext"
+	"log"
+	"github.com/posthog/posthog-go"
 )
+
+func GetFeatureFlag(flagname string) (state bool) {
+
+	log.Println("Getting state for flag", flagname)
+    client, _ := posthog.NewWithConfig(
+        os.Getenv("POSTHOG_API_KEY"),
+        posthog.Config{
+            Endpoint:       os.Getenv("POSTHOG_INSTANCE_ADDRESS"),
+            PersonalApiKey: os.Getenv("POSTHOG_API_KEY_PERSONAL"),
+        },
+    )
+    defer client.Close()
+
+	isFlagEnabled, err := client.IsFeatureEnabled(posthog.FeatureFlagPayload {Key:"test",DistinctId: "auth0-golang-api-samples"})
+
+	if err != nil {
+		log.Printf("Error fetching features from Posthog: %s \n", err)
+	}
+	log.Println("Flag state is", isFlagEnabled)
+	if isFlagEnabled == true {
+		return true
+	} else {
+		return false
+	}
+
+}
 
 // New sets up our routes and returns a *http.ServeMux.
 func New() *http.ServeMux {
-	
-	client, _ := ld.MakeClient(os.Getenv("LD_SDK_KEY"), 5 * time.Second)
-	flagKey := "test"
-	context := ldcontext.NewBuilder("api_public").
-    	Name("api_public").
-    	Build()
-
-	
+		
 	router := http.NewServeMux()
 
 	// This route is always accessible.
 	router.Handle("/api/public", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		showFeature, _ := client.BoolVariation(flagKey, context, false)
-		if showFeature {
-    			w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. This is the Launchdarkly version. The feature is on."}`))
+		if GetFeatureFlag("test") {
+    		w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. This is the Posthog version. The feature is on."}`))
 		} else {
-	    		w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. This is the Launchdarkly version. The feature is off."}`))
+	    	w.Write([]byte(`{"message":"Hello from a public endpoint! You don't need to be authenticated to see this. This is the Posthog version. The feature is off."}`))
 		}
 		
 	}))
@@ -45,11 +62,10 @@ func New() *http.ServeMux {
 			w.Header().Set("Access-Control-Allow-Headers", "Authorization")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			showFeature, _ := client.BoolVariation(flagKey, context, false)
-			if showFeature {
-				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is on."}`))
+			if GetFeatureFlag("test") {
+				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Posthog version. The feature is on."}`))
 			} else {
-				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is off."}`))
+				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Posthog version. The feature is off."}`))
 			}
 		}),
 	))
@@ -75,11 +91,10 @@ func New() *http.ServeMux {
 			}
 
 			w.WriteHeader(http.StatusOK)
-			showFeature, _ := client.BoolVariation(flagKey, context, false)
-			if showFeature {
-				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is on."}`))
+			if GetFeatureFlag("test") {
+				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Posthog version. The feature is on."}`))
 			} else {
-				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Launchdarkly version. The feature is off."}`))
+				w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this. This is the Posthog version. The feature is off."}`))
 			}
 		}),
 	))
